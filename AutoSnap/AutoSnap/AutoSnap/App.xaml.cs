@@ -28,6 +28,7 @@ namespace AutoSnap
 
             containerRegistry.RegisterForNavigation<NavigationPage>();
             containerRegistry.RegisterForNavigation<MainPage, MainPageViewModel>();
+            containerRegistry.RegisterForNavigation<AutoSnapPage, AutoSnapPageViewModel>();
         }
     }
 }

@@ -4,8 +4,18 @@
              x:Class="AutoSnap.Views.MainPage"
              Title="{Binding Title}">
 
-    <StackLayout HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand">
-        <Label Text="Welcome to Xamarin Forms and Prism!" />
-    </StackLayout>
+    <Grid RowDefinitions="Auto, Auto" VerticalOptions="Center">
+        <Grid Grid.Row="0" RowDefinitions="Auto, Auto" ColumnDefinitions="Auto, 1*" Margin="20">
+            <Label Grid.Row="0" Grid.Column="0" Text="ShutterFps" VerticalOptions="Center" />
+            <Entry Grid.Row="0" Grid.Column="1" Text="{Binding ShutterFps.Value}" Keyboard="Numeric" HorizontalTextAlignment="End" />
 
+            <Label Grid.Row="1" Grid.Column="0" Text="RearCamera" VerticalOptions="Center" />
+            <Switch Grid.Row="1" Grid.Column="1" IsToggled="{Binding IsRearCamera.Value}" />
+        </Grid>
+
+        <StackLayout Grid.Row="1">
+            <Button Text="Start auto snap." Command="{Binding StartAutoSnapCommand}" />
+        </StackLayout>
+    </Grid>
+    
 </ContentPage>
