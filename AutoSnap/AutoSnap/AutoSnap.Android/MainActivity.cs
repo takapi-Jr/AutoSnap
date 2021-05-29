@@ -19,6 +19,7 @@ namespace AutoSnap.Droid
 
             global::Xamarin.Forms.Forms.Init(this, savedInstanceState);
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
+            Plugin.CurrentActivity.CrossCurrentActivity.Current.Init(this, savedInstanceState);
             LoadApplication(new App(new AndroidInitializer()));
         }
 

@@ -15,7 +15,7 @@ namespace AutoSnap.ViewModels
 {
     public class MainPageViewModel : ViewModelBase, IDisposable
     {
-        public ReactiveProperty<int> ShutterFps { get; } = new ReactiveProperty<int>(1);
+        public ReactiveProperty<double> ShutterFps { get; } = new ReactiveProperty<double>(1.0f);
         public ReactiveProperty<bool> IsRearCamera { get; } = new ReactiveProperty<bool>(true);
         public CameraOptions CameraOption { get; set; } = CameraOptions.Rear;
 
@@ -33,7 +33,7 @@ namespace AutoSnap.ViewModels
             IsRearCamera.Subscribe(isRearCamera =>
             {
                 CameraOption = isRearCamera ? CameraOptions.Rear : CameraOptions.Front;
-            });
+            }).AddTo(this.Disposable);
 
             StartAutoSnapCommand.Subscribe(async () =>
             {

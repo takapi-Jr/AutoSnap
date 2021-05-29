@@ -11,7 +11,7 @@ namespace AutoSnap.ViewModels
 {
     public class AutoSnapPageViewModel : ViewModelBase
     {
-        public ReactiveProperty<int> ShutterFps { get; } = new ReactiveProperty<int>(1);
+        public ReactiveProperty<double> ShutterFps { get; } = new ReactiveProperty<double>(1.0f);
         public ReactiveProperty<CameraOptions> CameraOption { get; } = new ReactiveProperty<CameraOptions>(CameraOptions.Rear);
 
         public AutoSnapPageViewModel(INavigationService navigationService)
@@ -34,7 +34,7 @@ namespace AutoSnap.ViewModels
         {
             base.OnNavigatedTo(parameters);
 
-            ShutterFps.Value = parameters.GetValue<int>("ShutterFps");
+            ShutterFps.Value = parameters.GetValue<double>("ShutterFps");
             CameraOption.Value = parameters.GetValue<CameraOptions>("CameraOption");
         }
     }

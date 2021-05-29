@@ -1,3 +1,4 @@
+using AutoSnap.Models;
 using AutoSnap.ViewModels;
 using AutoSnap.Views;
 using Prism;
@@ -20,6 +21,27 @@ namespace AutoSnap
             InitializeComponent();
 
             await NavigationService.NavigateAsync("NavigationPage/MainPage");
+        }
+
+        protected override void OnStart()
+        {
+            base.OnStart();
+        }
+
+        protected override void OnSleep()
+        {
+            base.OnSleep();
+
+            //リソース解放処理を発行
+            MessagingCenter.Send<LifeCyclePayload>(new LifeCyclePayload { Status = LifeCycle.OnSleep }, "");
+        }
+
+        protected override void OnResume()
+        {
+            base.OnResume();
+
+            //リソース初期化処理を発行
+            MessagingCenter.Send<LifeCyclePayload>(new LifeCyclePayload { Status = LifeCycle.OnResume }, "");
         }
 
         protected override void RegisterTypes(IContainerRegistry containerRegistry)

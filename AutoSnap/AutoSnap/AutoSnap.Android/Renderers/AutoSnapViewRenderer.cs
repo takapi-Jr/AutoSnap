@@ -1,5 +1,4 @@
-﻿#if false
-using Android.App;
+﻿using Android.App;
 using Android.Content;
 using Android.OS;
 using Android.Runtime;
@@ -7,6 +6,7 @@ using Android.Views;
 using Android.Widget;
 using AutoSnap.Controls;
 using AutoSnap.Droid.Renderers;
+using AutoSnap.Models;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -14,145 +14,76 @@ using System.Linq;
 using System.Text;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.Android;
-using Xamarin.Forms.Platform.Android.FastRenderers;
 
 [assembly: ExportRenderer(typeof(AutoSnapView), typeof(AutoSnapViewRenderer))]
 namespace AutoSnap.Droid.Renderers
 {
-    public class AutoSnapViewRenderer : FrameLayout, IVisualElementRenderer, IViewRenderer
+    public class AutoSnapViewRenderer : ViewRenderer<AutoSnapView, DroidAutoSnapView>
     {
-        public int? DefaultLabelFor { get; set; }
-        public bool Disposed { get; set; }
+        private DroidAutoSnapView DroidAutoSnapView { get; set; }
 
-        public VisualElementTracker VisualElementTracker { get; set; }
-        public VisualElementRenderer VisualElementRenderer { get; set; }
-        
-        public AutoSnapFragment AutoSnapFragment { get; set; }
-
-        private AutoSnapView element;
-        public AutoSnapView Element
+        public AutoSnapViewRenderer(Context context) : base(context)
         {
-            get { return element; }
-            set
+        }
+
+        protected override void OnElementChanged(ElementChangedEventArgs<AutoSnapView> e)
+        {
+            base.OnElementChanged(e);
+
+            if (e.OldElement != null)
             {
-                if (element == value)
+            }
+            if (e.NewElement != null)
+            {
+                if (Control == null)
                 {
-                    return;
+                    this.DroidAutoSnapView = new DroidAutoSnapView(Context, e.NewElement);
+                    SetNativeControl(this.DroidAutoSnapView);
                 }
-                var oldElement = element;
-                element = value;
-                OnElementChanged(new ElementChangedEventArgs<AutoSnapView>(oldElement, element));
             }
         }
 
-        private FragmentManager fragmentManager;
-        public FragmentManager FragmentManager => fragmentManager ??= Context.GetFragmentManager();
-
-        public event EventHandler<VisualElementChangedEventArgs> ElementChanged;
-        public event EventHandler<PropertyChangedEventArgs> ElementPropertyChanged;
-
-
-
-        public AutoSnapViewRenderer(Context context)
-            : base(context)
+        protected override void OnElementPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-             = ;
-        }
+            base.OnElementPropertyChanged(sender, e);
 
-
-
-
-
-#region IViewRenderer
-
-        void IViewRenderer.MeasureExactly() => MeasureExactly(this, Element, Context);
-
-        public void MeasureExactly(Android.Views.View control, VisualElement element, Context context)
-        {
-            if (control == null || element == null)
+            if (this.Element == null || this.Control == null)
             {
                 return;
             }
 
-            var width = element.Width;
-            var height = element.Height;
-
-            if (width <= 0 || height <= 0)
+            // PCL側(Element)の変更をAndroid/iOSプラットフォーム(Control)に反映
+            if (e.PropertyName == nameof(Element.IsPreviewing))
             {
-                return;
+                if (this.Control != null)
+                {
+                    // AutoSnapPageのビハインドコードのDisappearing/Appearingでの変更を反映
+                    this.Control.FormsAutoSnapView.IsPreviewing = this.Element.IsPreviewing;
+                    this.Control.IsPreviewing = this.Element.IsPreviewing;
+                }
             }
-
-            var realWidth = (int)context.ToPixels(width);
-            var realHeight = (int)context.ToPixels(height);
-
-            var widthMeasureSpec = MeasureSpecFactory.MakeMeasureSpec(realWidth, MeasureSpecMode.Exactly);
-            var heightMeasureSpec = MeasureSpecFactory.MakeMeasureSpec(realHeight, MeasureSpecMode.Exactly);
-
-            control.Measure(widthMeasureSpec, heightMeasureSpec);
+            if (e.PropertyName == nameof(Element.ShutterFps))
+            {
+                if (this.Control != null)
+                {
+                    this.Control.FormsAutoSnapView.ShutterFps = this.Element.ShutterFps;
+                    this.Control.ShutterFps = this.Element.ShutterFps;
+                }
+            }
         }
 
-#endregion
-
-
-#region IVisualElementRenderer
-
-        VisualElement IVisualElementRenderer.Element => Element;
-        VisualElementTracker IVisualElementRenderer.Tracker => VisualElementTracker;
-        ViewGroup IVisualElementRenderer.ViewGroup => null;
-        Android.Views.View IVisualElementRenderer.View => this;
-
-        public SizeRequest GetDesiredSize(int widthConstraint, int heightConstraint)
+        protected override void Dispose(bool disposing)
         {
-            Measure(widthConstraint, heightConstraint);
-            var result = new SizeRequest(new Size(MeasuredWidth, MeasuredHeight), new Size(Context.ToPixels(20), Context.ToPixels(20)));
-            return result;
-        }
-
-        public void SetElement(VisualElement element)
-        {
-            if (!(element is AutoSnapView autoSnapView))
+            if (disposing)
             {
-                throw new ArgumentException($"{nameof(element)} must be of type {nameof(AutoSnapView)}");
+                this.Control.Release();
+                MessagingCenter.Unsubscribe<LifeCyclePayload>(this.Control, "");
+
+                // 下記実行すると、base.Dispose(disposing);で例外発生
+                //Control.Dispose();
             }
 
-            if (this.VisualElementTracker == null)
-            {
-                this.VisualElementTracker = new VisualElementTracker(this);
-            }
-            this.Element = autoSnapView;
-        }
-
-        public void SetLabelFor(int? id)
-        {
-            if (this.DefaultLabelFor == null)
-            {
-                this.DefaultLabelFor = LabelFor;
-            }
-            LabelFor = (int)(id ?? this.DefaultLabelFor);
-        }
-
-        public void UpdateLayout()
-        {
-            this.VisualElementTracker?.UpdateLayout();
-        }
-
-#endregion
-
-
-
-        static class MeasureSpecFactory
-        {
-            public static int GetSize(int measureSpec)
-            {
-                const int modeMask = 0x3 << 30;
-                return measureSpec & ~modeMask;
-            }
-
-            public static int MakeMeasureSpec(int size, MeasureSpecMode mode)
-            {
-                return size + (int)mode;
-            }
+            base.Dispose(disposing);
         }
     }
 }
-#endif

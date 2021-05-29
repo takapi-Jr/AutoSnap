@@ -11,13 +11,13 @@ namespace AutoSnap.Controls
         // シャッタースピード
         public static readonly BindableProperty ShutterFpsProperty = BindableProperty.Create(
             propertyName: "ShutterFps",
-            returnType: typeof(int),
+            returnType: typeof(double),
             declaringType: typeof(AutoSnapView),
-            defaultValue: 1);
+            defaultValue: 1.0f);
 
-        public int ShutterFps
+        public double ShutterFps
         {
-            get { return (int)GetValue(ShutterFpsProperty); }
+            get { return (double)GetValue(ShutterFpsProperty); }
             set { SetValue(ShutterFpsProperty, value); }
         }
 
