@@ -50,10 +50,12 @@ namespace AutoSnap.Droid.Renderers
             // dataはYuv形式のバイト配列
             var yuvImage = new YuvImage(data, previewFormat, size.Width, size.Height, null);
 
+            var filePath = AutoSnap.Models.Common.GetFilePath();
             using (var stream = new MemoryStream())
+            using (var fos = new Java.IO.FileOutputStream(filePath))
             {
                 await yuvImage.CompressToJpegAsync(new Android.Graphics.Rect(0, 0, size.Width, size.Height), 100, stream);
-                var bytes = stream.ToArray();
+                await fos.WriteAsync(stream.ToArray());
             }
         }
     }
